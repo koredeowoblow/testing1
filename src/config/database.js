@@ -10,6 +10,12 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST,
     dialect: process.env.DB_DIALECT || 'mysql',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false, // For Render's managed databases
+      },
+    },
     logging: process.env.NODE_ENV === 'development' ? console.log : false,
     pool: {
       max: 5,
