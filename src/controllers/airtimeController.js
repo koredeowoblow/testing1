@@ -28,8 +28,8 @@ const initializeAirtimeConversion = async (req, res) => {
     );
 
     const result = response.data;
-
-    if ([101].includes(response.code)) {
+    console.log(result)
+    if (result.code == 101) {
       return res.status(200).json({
         status: 'success',
         message: result.description.message,
