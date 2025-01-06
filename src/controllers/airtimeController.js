@@ -34,7 +34,7 @@ const initializeAirtimeConversion = async (req, res) => {
         status: 'success',
         message: result.description.message,
         phone: result.description.Phone_Number,
-        data: result.description,
+        
       });
     } else {
       // Handle API errors
