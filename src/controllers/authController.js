@@ -13,8 +13,16 @@ export const register = async (req, res, next) => {
   try {
     const { username, email, password, role, phone_number, pin } = req.body;
     const account_balance = 0;
-
+    const check = await User.findOne({
+      where: { email: email },
+    });
     // Create user
+    if (check) {
+      res.status(400).json({
+        status: 'failed',
+       message: "email has already been used"
+      });
+    }
     const user = await User.create({
       username,
       email,
@@ -24,14 +32,17 @@ export const register = async (req, res, next) => {
       pin,
       account_balance
     });
-    const history = await User.findAll({ email: user.email });
+    // const history = await User.findAll({ email: user.email });
+    const users = await User.findOne({
+      where: { email: user.email},
+    });
     // Generate token
     const token = generateToken(user.id);
 
     res.status(201).json({
       status: 'success',
       data: {
-        history,
+        users,
         token
       }
     });
