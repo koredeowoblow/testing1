@@ -20,7 +20,7 @@ export const register = async (req, res, next) => {
     if (check) {
       res.status(400).json({
         status: 'failed',
-       message: "email has already been used"
+        message: "email has already been used"
       });
     }
     const user = await User.create({
@@ -34,7 +34,7 @@ export const register = async (req, res, next) => {
     });
     // const history = await User.findAll({ email: user.email });
     const users = await User.findOne({
-      where: { email: user.email},
+      where: { email: user.email },
     });
     // Generate token
     const token = generateToken(user.id);
@@ -206,3 +206,6 @@ export const changePassword = async (req, res, next) => {
   }
 };
 
+export const logout = async (req, res, next) => {
+  jwt.destroy(token)
+}
