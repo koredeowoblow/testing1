@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import BlacklistedToken from '../models/BlacklistedToken.js';
 
 // Middleware to protect user routes
 export const protectUser = async (req, res, next) => {
@@ -134,4 +135,27 @@ export const authorize = (...roles) => {
     }
     next();
   };
+};
+// Middleware to validate tokens
+export const validateToken = async (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ message: 'Token is missing' });
+  }
+
+  // Check if token is blacklisted
+  const blacklistedToken = await BlacklistedToken.findOne({ token });
+  if (blacklistedToken) {
+    return res.status(401).json({ message: 'Token is invalid or has been logged out' });
+  }
+
+  // Proceed with regular JWT validation
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+    req.user = decoded;
+    next();
+  });
 };

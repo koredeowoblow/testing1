@@ -2,6 +2,8 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import User from '../models/User.js';
 import { sendResetPasswordEmail } from '../services/emailService.js';
+import { BlacklistedToken } from './models'; // Adjust the path to your Sequelize model
+
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -206,6 +208,30 @@ export const changePassword = async (req, res, next) => {
   }
 };
 
+x1``
 export const logout = async (req, res, next) => {
-  jwt.destroy(token)
-}
+  try {
+    // Retrieve token from request headers
+    const token = req.headers.authorization?.split(' ')[1]; // Format: "Bearer <token>"
+
+    if (!token) {
+      return res.status(400).json({ message: 'Token not provided' });
+    }
+
+    // Decode token (optional, for user details or debugging)
+    const decoded = jwt.decode(token);
+
+    // Add token to the blacklist table
+    await BlacklistedToken.create({ token });
+
+    // Respond with success
+    return res.status(200).json({
+      message: 'User successfully logged out',
+      userId: decoded?.id, // Optional, if you want to return user details
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Logout failed', error: error.message });
+  }
+};
+
+

@@ -1,6 +1,6 @@
 import express from 'express';
 import * as usercontroller from '../controllers/userController.js';
-import { protectUser, authorize } from '../middleware/authMiddleware.js';
+import { protectUser, authorize, validateToken } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 
@@ -32,7 +32,7 @@ const router = express.Router();
  *       403:
  *         description: Forbidden - User does not have permission
  */
-router.post('/accountbalance', protectUser, usercontroller.fetchAccountBalnce);
+router.post('/accountbalance', protectUser, authorize('user'), validateToken, usercontroller.fetchAccountBalnce);
 
 /**
  * @swagger
@@ -51,7 +51,7 @@ router.post('/accountbalance', protectUser, usercontroller.fetchAccountBalnce);
  *       403:
  *         description: Forbidden - User does not have permission
  */
-router.get('/fetchProduct', protectUser, authorize('user'), usercontroller.fetchProduct);
+router.get('/fetchProduct', protectUser, authorize('user'),validateToken, usercontroller.fetchProduct);
 
 /**
  * @swagger
@@ -70,7 +70,7 @@ router.get('/fetchProduct', protectUser, authorize('user'), usercontroller.fetch
  *       403:
  *         description: Forbidden - User does not have permission
  */
-router.get('/fetchBank', protectUser, authorize('user'), usercontroller.FecthallBank);
+router.get('/fetchBank', protectUser, authorize('user'),validateToken, usercontroller.FecthallBank);
 
 /**
  * @swagger
@@ -100,6 +100,6 @@ router.get('/fetchBank', protectUser, authorize('user'), usercontroller.Fecthall
  *       403:
  *         description: Forbidden - User does not have permission
  */
-router.get('/userDetails', protectUser, authorize('user'), usercontroller.fetchUserDetail);
+router.get('/userDetails', protectUser, authorize('user'),validateToken, usercontroller.fetchUserDetail);
 
 export default router;
