@@ -86,8 +86,9 @@ export const login = async (req, res, next) => {
     const token = generateToken(user.id);
 
     // Create session
-    const data = [token, user.id];
-    const session = await createSession(data, res); // Make sure createSession is awaited
+    const userId =user.id;
+    const data = [token, userId];
+    const session = await createSession(data, res); 
 
     return res.status(200).json({
       status: 'success',
