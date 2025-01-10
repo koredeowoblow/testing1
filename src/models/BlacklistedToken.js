@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/database'; // Adjust the path to your Sequelize instance
+import sequelize from '../config/database.js'; // Adjust the path to your Sequelize instance
 
 const BlacklistedToken = sequelize.define('BlacklistedToken', {
   token: {
