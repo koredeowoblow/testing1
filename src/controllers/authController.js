@@ -1,8 +1,7 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import User from '../models/User.js';
-import { sendResetPasswordEmail } from '../services/emailService.js';
-import BlacklistedToken  from '../models/BlacklistedToken.js'; // Adjust the path to your Sequelize model
+import { sendResetPasswordEmail } from '../services/emailService.js';model
 
 
 const generateToken = (id) => {
@@ -208,30 +207,67 @@ export const changePassword = async (req, res, next) => {
   }
 };
 
-export const logout = async (req, res, next) => {
+export const logout = async (req, res) => {
   try {
     // Retrieve token from request headers
-    const token = req.headers.authorization?.split(' ')[1]; // Format: "Bearer <token>"
+    const token = req.headers.authorization?.split(" ")[1]; // Format: "Bearer <token>"
 
     if (!token) {
-      return res.status(400).json({ message: 'Token not provided' });
+      return res.status(400).json({
+        status: "error",
+        message: "Token not provided",
+      });
     }
 
-    // Decode token (optional, for user details or debugging)
-    const decoded = jwt.decode(token);
+    // Decode token to retrieve user details
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify and decode the token
+    } catch (error) {
+      return res.status(401).json({
+        status: "error",
+        message: "Invalid or expired token",
+      });
+    }
 
-    // Add token to the blacklist table
-    await BlacklistedToken.create({ token });
+    // Find the session by token
+    const session = await Session.findOne({
+      where: { token },
+    });
+
+    if (!session) {
+      return res.status(404).json({
+        status: "error",
+        message: "Session not found",
+      });
+    }
+
+    // Check if session is already inactive
+    if (session.status === "inactive") {
+      return res.status(400).json({
+        status: "error",
+        message: "Session already inactive",
+      });
+    }
+
+    // Update session status to "inactive"
+    await Session.update(
+      { status: "inactive" },
+      { where: { token } }
+    );
 
     // Respond with success
     return res.status(200).json({
-      status: 'success',
-      message: 'User successfully logged out',
-      userId: decoded?.id, // Optional, if you want to return user details
+      status: "success",
+      message: "User successfully logged out",
+      userId: decoded?.id, // Optional: Include user details in the response
     });
   } catch (error) {
-    return res.status(500).json({ message: 'Logout failed', error: error.message });
+    console.error("Logout error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Logout failed",
+      error: error.message,
+    });
   }
 };
-
-
