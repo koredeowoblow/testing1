@@ -225,6 +225,7 @@ export const logout = async (req, res, next) => {
 
     // Respond with success
     return res.status(200).json({
+      status: 'success',
       message: 'User successfully logged out',
       userId: decoded?.id, // Optional, if you want to return user details
     });
