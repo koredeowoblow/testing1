@@ -4,9 +4,9 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const createSession = async (data, res) => {
+const createSession = async (token, userId) => {
     try {
-        const { userId, token } = data;
+       
 
         // Validate input data
         if (!userId || !token) {
@@ -59,14 +59,14 @@ const createSession = async (data, res) => {
             status: "active",
         });
 
-        return res.status(201).json({
+        return ({
             status: "success",
             message: "Session created successfully.",
             session: newSession,
         });
     } catch (error) {
         console.error("Error creating session:", error);
-        return res.status(500).json({
+        return ({
             status: "error",
             message: "An error occurred while creating the session.",
         });

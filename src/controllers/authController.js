@@ -85,18 +85,22 @@ export const login = async (req, res, next) => {
     // Generate token
     const token = generateToken(user.id);
 
-    // Create session
-    const userId =user.id;
-    const data = [token, userId];
-    const session = await createSession(data, res); 
+    // Data to be passed to createSession
+    const data = [token, user.id];
+    const userId=user.id
 
-    return res.status(200).json({
-      status: 'success',
-      data: {
-        user,
-        token
-      }
-    });
+    // Create session
+    const session = await createSession(token, userId);
+    if (session.status === 'success') {
+      // Respond with success and token
+      return res.status(200).json({
+        status: 'success',
+        data: {
+          user,
+          token
+        }
+      });
+    }
   } catch (error) {
     next(error);
   }
