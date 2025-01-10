@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import User from '../models/User.js';
 import { sendResetPasswordEmail } from '../services/emailService.js';
-import { BlacklistedToken } from './models'; // Adjust the path to your Sequelize model
+import { BlacklistedToken } from '../models/BlacklistedToken'; // Adjust the path to your Sequelize model
 
 
 const generateToken = (id) => {
