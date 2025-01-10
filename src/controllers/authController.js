@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import User from '../models/User.js';
 import { sendResetPasswordEmail } from '../services/emailService.js';
-
+import createSession from '../services/session.js';
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -14,33 +14,37 @@ export const register = async (req, res, next) => {
   try {
     const { username, email, password, role, phone_number, pin } = req.body;
     const account_balance = 0;
-    const check = await User.findOne({
-      where: { email: email },
-    });
-    // Create user
+
+    // Check if the email already exists
+    const check = await User.findOne({ where: { email: email } });
+
     if (check) {
-      res.status(400).json({
+      return res.status(400).json({
         status: 'failed',
-        message: "email has already been used"
+        message: "Email has already been used"
       });
     }
+
+    // Create user
     const user = await User.create({
       username,
       email,
       password,
-      role: role || 'user',// Default to 'user' if no role specified
+      role: role || 'user', // Default to 'user' if no role is specified
       phone_number,
       pin,
       account_balance
     });
-    // const history = await User.findAll({ email: user.email });
+
+    // Fetch the newly created user
     const users = await User.findOne({
       where: { email: user.email },
     });
+
     // Generate token
     const token = generateToken(user.id);
 
-    res.status(201).json({
+    return res.status(201).json({
       status: 'success',
       data: {
         users,
@@ -64,7 +68,7 @@ export const login = async (req, res, next) => {
       });
     }
 
-    // Find user
+    // Find user by email
     const user = await User.findOne({ where: { email } });
 
     if (!user || !(await user.comparePassword(password))) {
@@ -81,7 +85,11 @@ export const login = async (req, res, next) => {
     // Generate token
     const token = generateToken(user.id);
 
-    res.json({
+    // Create session
+    const data = [token, user.id];
+    const session = await createSession(data, res); // Make sure createSession is awaited
+
+    return res.status(200).json({
       status: 'success',
       data: {
         user,
@@ -92,6 +100,7 @@ export const login = async (req, res, next) => {
     next(error);
   }
 };
+
 
 export const forgotPassword = async (req, res, next) => {
   try {
