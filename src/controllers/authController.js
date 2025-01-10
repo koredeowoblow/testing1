@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import User from '../models/User.js';
 import { sendResetPasswordEmail } from '../services/emailService.js';
 import createSession from '../services/session.js';
+import Session from '../models/Session.js';
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
