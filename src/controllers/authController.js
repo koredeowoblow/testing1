@@ -208,7 +208,6 @@ export const changePassword = async (req, res, next) => {
   }
 };
 
-x1``
 export const logout = async (req, res, next) => {
   try {
     // Retrieve token from request headers
