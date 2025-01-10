@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import User from '../models/User.js';
-import { sendResetPasswordEmail } from '../services/emailService.js';model
+import { sendResetPasswordEmail } from '../services/emailService.js';
 
 
 const generateToken = (id) => {
