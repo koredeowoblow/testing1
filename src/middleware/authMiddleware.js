@@ -138,24 +138,42 @@ export const authorize = (...roles) => {
 };
 // Middleware to validate tokens
 export const validateToken = async (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.split(' ')[1];
 
-  if (!token) {
-    return res.status(401).json({ message: 'Token is missing' });
-  }
-
-  // Check if token is blacklisted
-  const blacklistedToken = await BlacklistedToken.findOne({ token });
-  if (blacklistedToken) {
-    return res.status(401).json({ message: 'Token is invalid or has been logged out' });
-  }
-
-  // Proceed with regular JWT validation
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(401).json({ message: 'Invalid token' });
+    if (!token) {
+      return res.status(401).json({ message: 'Token is missing' });
     }
+
+    console.log("Token received for validation:", token);
+
+    // Normalize the token for consistency
+    const normalizedToken = token.trim();
+
+    // Check if the token is blacklisted
+    const isBlacklisted = await BlacklistedToken.findOne({ token: normalizedToken });
+    console.log("Is token blacklisted:", !!isBlacklisted);
+
+    if (isBlacklisted) {
+      return res.status(401).json({ message: 'Token has been blacklisted or logged out' });
+    }
+
+    // Verify the token
+    const decoded = jwt.verify(normalizedToken, process.env.JWT_SECRET);
     req.user = decoded;
+
     next();
-  });
+  } catch (error) {
+    console.error('Token validation error:', error.message);
+
+    return res.status(401).json({
+      message:
+        error.name === 'JsonWebTokenError'
+          ? 'Invalid token'
+          : error.name === 'TokenExpiredError'
+          ? 'Token has expired'
+          : 'Unauthorized',
+    });
+  }
 };
