@@ -151,8 +151,8 @@ export const validateToken = async (req, res, next) => {
     // Normalize the token for consistency
     const normalizedToken = token.trim();
 
-    // Check if the token is blacklisted
-    const isBlacklisted = await BlacklistedToken.findOne({ token: normalizedToken });
+    // Check if the token is blacklistedwhere: { id: userId },
+    const isBlacklisted = await BlacklistedToken.findAll({ where: { token: normalizedToken } });
     console.log("Is token blacklisted:", !!isBlacklisted);
 
     if (isBlacklisted) {
@@ -172,8 +172,8 @@ export const validateToken = async (req, res, next) => {
         error.name === 'JsonWebTokenError'
           ? 'Invalid token'
           : error.name === 'TokenExpiredError'
-          ? 'Token has expired'
-          : 'Unauthorized',
+            ? 'Token has expired'
+            : 'Unauthorized',
     });
   }
 };
