@@ -1,7 +1,7 @@
 import axios from 'axios';
 import User from '../models/User.js';
 import dotenv from 'dotenv';
-import {saveTransaction} from '../services/savingtransaction.js';
+import { saveTransaction } from '../services/savingtransaction.js';
 import https from 'https';
 import generateUniqueRef from '../services/referenceNumberGenerator.js';
 
@@ -34,7 +34,7 @@ const initializeAirtimeConversion = async (req, res) => {
         status: 'success',
         message: result.description.message,
         phone: result.description.Phone_Number,
-        
+
       });
     } else {
       // Handle API errors
@@ -55,14 +55,15 @@ const initializeAirtimeConversion = async (req, res) => {
 const CompleteAirtimeConversion = async (req, res) => {
   try {
     const {
-      user_id: userId,
+      user_id,
       amount,
       network,
       Sender_phone: senderPhone,
-      reciever_phone: receiverPhone
+      receiver_phone: receiverPhone, // Correct typo here
     } = req.body;
 
-    if (!userId || !amount || !network || !senderPhone || !receiverPhone) {
+
+    if (!user_id || !amount || !network || !senderPhone || !receiverPhone) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
@@ -102,7 +103,7 @@ const CompleteAirtimeConversion = async (req, res) => {
               status = "successful"
             }
             const transactionData = {
-              userId,
+              user_id,
               type: 'airtime_conversion',
               amount,
               referenceId: ref,
