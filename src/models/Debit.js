@@ -16,9 +16,10 @@ const Debit = sequelize.define('Debit', {
     type: DataTypes.DECIMAL,
     allowNull: false,
   },
-  recipient: {
-    type: DataTypes.STRING, // E.g., recipient account or phone number
+  reference_id: {
+    type: DataTypes.STRING(255),
     allowNull: false,
+    unique: true,
   },
   reference_id: {
     type: DataTypes.STRING,

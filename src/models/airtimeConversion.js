@@ -25,8 +25,9 @@ const AirtimeConversion = sequelize.define('AirtimeConversion', {
     allowNull: false,
   },
   reference_id: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(255),
     allowNull: false,
+    unique: true,
   },
   created_at: {
     type: DataTypes.DATE,
