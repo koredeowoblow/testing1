@@ -89,7 +89,7 @@ export const login = async (req, res, next) => {
     // Data to be passed to createSession
     const data = [token, user.id];
     const userId=user.id
-
+    
     // Create session
     const session = await createSession(token, userId);
     if (session.status === 'success') {

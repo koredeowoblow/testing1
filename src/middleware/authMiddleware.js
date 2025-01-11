@@ -165,6 +165,7 @@ export const checkSessionValidity = async (req, res, next) => {
       where: { token },
     });
 
+    // If session is not found, return an error
     if (!session) {
       return res.status(401).json({
         status: "error",

@@ -76,7 +76,7 @@ const CompleteAirtimeConversion = async (req, res) => {
       amount,
       sitephone: receiverPhone,
       ref,
-      webhookURL: 'http://testlink.com/webhook/', // Replace with your webhook URL
+      webhookURL: 'https://testing1-xpjd.onrender.com/api/airtime/webhook', // Replace with your webhook URL
     });
 
     const url = `https://vtuafrica.com.ng/portal/api/airtime-cash/?${queryParams.toString()}`;

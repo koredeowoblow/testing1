@@ -1,6 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
-
+import bcrypt from 'bcryptjs';
 const Session = sequelize.define('Session', {
     id: {
         type: DataTypes.UUID,
@@ -28,6 +28,15 @@ const Session = sequelize.define('Session', {
 }, {
     timestamps: true,
     tableName: 'sessions',
+}, {
+    hooks: {
+        beforeCreate: async (user) => {
+            if (session.token) {
+                const salt = await bcrypt.genSalt(10);
+                user.password = await bcrypt.hash(session.token, salt);
+            }
+        }
+    }
 });
 
 export default Session;
