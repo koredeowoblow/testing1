@@ -17,6 +17,7 @@ const Transactions = sequelize.define('Transactions', {
   },
   reference_id: {
     type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
     allowNull: false,
     unique: true, // Ensure the column is unique
   },
