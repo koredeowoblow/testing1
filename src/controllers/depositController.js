@@ -25,7 +25,7 @@ export const createDeposit = async (req, res, next) => {
      type: 'deposit',
      amount,
      referenceId,
-     status: 'pending',
+     status,
    };
 
    const result = await saveTransaction(transactionData);
