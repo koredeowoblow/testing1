@@ -1,7 +1,7 @@
 import Deposit from '../models/Deposits.js';
 import User from '../models/User.js';
 import generateUniqueReference from '../services/referenceNumberGenerator.js';
-import saveTransaction from '../services/savingtransaction.js';
+import {saveTransaction} from '../services/savingtransaction.js';
 
 // Create a new deposit
 export const createDeposit = async (req, res, next) => {
