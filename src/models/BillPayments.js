@@ -28,7 +28,7 @@ const BillPayments = sequelize.define('BillPayments', {
     defaultValue: 'pending',
   },
   reference_id: {
-    type: DataTypes.UUID,
+    type: DataTypes.STRING,
     allowNull: false,
   },
   created_at: {

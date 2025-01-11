@@ -18,7 +18,7 @@ const Deposit = sequelize.define('Deposit', {
     allowNull: false,
   },
   reference_id: {
-    type: DataTypes.UUID,
+    type: DataTypes.STRING,
     allowNull: false,
   },
   status: {

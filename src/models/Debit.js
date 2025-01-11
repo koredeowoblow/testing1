@@ -21,7 +21,7 @@ const Debit = sequelize.define('Debit', {
     allowNull: false,
   },
   reference_id: {
-    type: DataTypes.UUID,
+    type: DataTypes.STRING,
     allowNull: false,
   },
   status: {
