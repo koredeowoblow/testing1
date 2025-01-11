@@ -1,7 +1,7 @@
 import axios from 'axios';
 import User from '../models/User.js';
 import dotenv from 'dotenv';
-import saveTransaction from '../services/savingtransaction.js';
+import {saveTransaction} from '../services/savingtransaction.js';
 import https from 'https';
 import generateUniqueRef from '../services/referenceNumberGenerator.js';
 
