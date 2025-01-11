@@ -65,6 +65,7 @@ const CompleteAirtimeConversion = async (req, res) => {
     if (!userId || !amount || !network || !senderPhone || !receiverPhone) {
       return res.status(400).json({ error: 'All fields are required' });
     }
+
     const ref = await generateUniqueRef();
 
     const queryParams = new URLSearchParams({
@@ -75,10 +76,10 @@ const CompleteAirtimeConversion = async (req, res) => {
       amount,
       sitephone: receiverPhone,
       ref,
-      webhookURL: 'https://testing1-xpjd.onrender.com/api/airtime/webhook', // Replace with your webhook URL
+      webhookURL: 'http://testlink.com/webhook/', // Replace with your webhook URL
     });
 
-    const url = `https://vtuafrica.com.ng/portal/api-test/airtime-cash/?${queryParams.toString()}`;
+    const url = `https://vtuafrica.com.ng/portal/api/airtime-cash/?${queryParams.toString()}`;
 
     https.get(url, (apiRes) => {
       let data = '';
@@ -145,7 +146,6 @@ const CompleteAirtimeConversion = async (req, res) => {
     return res.status(500).json({ error: 'An unexpected error occurred' });
   }
 };
-
 
 
 export { initializeAirtimeConversion, CompleteAirtimeConversion };

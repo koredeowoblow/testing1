@@ -8,14 +8,12 @@ import Sequelize from 'sequelize';
 
 
 export const saveTransaction = async (transactionData) => {
-  const { userId, type, amount, referenceId, status, details } = transactionData;
+  const { userId, type, amount, referenceId, status = 'pending', details } = transactionData;
 
   try {
+    // Begin a database transaction
     const result = await Transactions.sequelize.transaction(async (t) => {
       // Save the main transaction record
-      if (status = "Processing") {
-        status = 'pending';
-      }
       const transaction = await Transactions.create(
         {
           user_id: userId,
@@ -29,13 +27,14 @@ export const saveTransaction = async (transactionData) => {
 
       let relatedRecord;
 
-      // Save related records and update user balance based on transaction type
+      // Save related records based on the transaction type
       if (type === 'airtime_conversion') {
         const { telecomProvider, phone } = details;
 
+        // Use the transaction's id as the foreign key
         relatedRecord = await AirtimeConversion.create(
           {
-            reference_id: referenceId,
+            reference_id: referenceId, // Correct FK relationship
             user_id: userId,
             amount,
             telecom_provider: telecomProvider,
@@ -47,10 +46,9 @@ export const saveTransaction = async (transactionData) => {
 
       } else if (type === 'debit') {
         const { recipient, remarks } = details;
-
         relatedRecord = await Debit.create(
           {
-            reference_id: referenceId,
+            reference_id: referenceId, // Correct FK relationship
             user_id: userId,
             amount,
             recipient,
@@ -59,15 +57,16 @@ export const saveTransaction = async (transactionData) => {
           { transaction: t }
         );
 
-        // Update user balance
-        await User.update(
-          { account_balance: Sequelize.literal(`account_balance - ${amount}`) },
-          { where: { id: userId }, transaction: t }
-        );
+        // Update user balance (subtract amount for debit)
+        const user = await User.findByPk(userId, { transaction: t });
+        if (user) {
+          user.account_balance -= amount;
+          await user.save({ transaction: t });
+        }
       } else if (type === 'deposit') {
         relatedRecord = await Deposit.create(
           {
-            reference_id: referenceId,
+            reference_id: referenceId, // Correct FK relationship
             user_id: userId,
             amount,
             status,
@@ -75,17 +74,17 @@ export const saveTransaction = async (transactionData) => {
           { transaction: t }
         );
 
-        // Update user balance
-        await User.update(
-          { account_balance: Sequelize.literal(`account_balance + ${amount}`) },
-          { where: { id: userId }, transaction: t }
-        );
+        // Update user balance (add amount for deposit)
+        const user = await User.findByPk(userId, { transaction: t });
+        if (user) {
+          user.account_balance += amount;
+          await user.save({ transaction: t });
+        }
       } else if (type === 'bill_payment') {
         const { billType, billProvider } = details;
-
         relatedRecord = await BillPayments.create(
           {
-            reference_id: referenceId,
+            reference_id: referenceId, // Correct FK relationship
             user_id: userId,
             amount,
             bill_type: billType,
@@ -95,22 +94,27 @@ export const saveTransaction = async (transactionData) => {
           { transaction: t }
         );
 
-        // Update user balance
-        await User.update(
-          { account_balance: Sequelize.literal(`account_balance - ${amount}`) },
-          { where: { id: userId }, transaction: t }
-        );
+        // Update user balance (subtract amount for bill payment)
+        const user = await User.findByPk(userId, { transaction: t });
+        if (user) {
+          user.account_balance -= amount;
+          await user.save({ transaction: t });
+        }
       }
 
-      return { transaction, relatedRecord };
+      // Return both the transaction and related record
+      return {
+        transaction,
+        relatedRecord,
+      };
     });
 
     return { status: 'success', message: 'Transaction saved successfully', data: result };
   } catch (error) {
-    console.error('Error saving transaction:', error);
     return { status: 'error', message: error.message };
   }
 };
+
 
 export const updateTransactionStatus = async (transactionId, Status, credit, details) => {
   try {
