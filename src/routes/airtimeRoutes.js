@@ -1,7 +1,7 @@
 import express from 'express';
 import * as conversion from '../controllers/airtimeController.js';
 import { checkSessionValidity } from '../middleware/authMiddleware.js';
-import updateTransactionStatus from '../services/savingtransaction.js';
+import {updateTransactionStatus} from '../services/savingtransaction.js';
 
 const router = express.Router();
 
