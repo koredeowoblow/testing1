@@ -88,8 +88,8 @@ export const login = async (req, res, next) => {
 
     // Data to be passed to createSession
     const data = [token, user.id];
-    const userId=user.id
-    
+    const userId = user.id
+
     // Create session
     const session = await createSession(token, userId);
     if (session.status === 'success') {
@@ -234,10 +234,10 @@ export const logout = async (req, res) => {
       });
     }
 
-    // Decode token to retrieve user details
+    // Decode and verify the token
     let decoded;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify and decode the token
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
       return res.status(401).json({
         status: "error",
@@ -257,31 +257,28 @@ export const logout = async (req, res) => {
       });
     }
 
-    // Check if session is already inactive
+    // Check if the session is already inactive
     if (session.status === "inactive") {
       return res.status(400).json({
         status: "error",
-        message: "Session already inactive",
+        message: "Session is already inactive",
       });
     }
 
-    // Update session status to "inactive"
-    await Session.update(
-      { status: "inactive" },
-      { where: { token } }
-    );
+    // Update the session status to "inactive"
+    await session.update({ status: "inactive" });
 
     // Respond with success
     return res.status(200).json({
       status: "success",
       message: "User successfully logged out",
-      userId: decoded?.id, // Optional: Include user details in the response
+      userId: decoded.id, // Optional: Include user details in the response
     });
   } catch (error) {
     console.error("Logout error:", error);
     return res.status(500).json({
       status: "error",
-      message: "Logout failed",
+      message: "Logout failed due to an internal error",
       error: error.message,
     });
   }
