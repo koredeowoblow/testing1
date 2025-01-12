@@ -1,7 +1,7 @@
 import express from 'express';
 import * as conversion from '../controllers/airtimeController.js';
 import { checkSessionValidity } from '../middleware/authMiddleware.js';
-import {updateTransactionStatus} from '../services/savingtransaction.js';
+import { updateTransactionStatus } from '../services/savingtransaction.js';
 
 const router = express.Router();
 
@@ -178,10 +178,10 @@ router.post('/webhook', async (req, res) => {
         // Process the webhook asynchronously
         if (status === 'Completed') {
             const Status = status;
-            await updateTransactionStatus({
+            const update = await updateTransactionStatus({
                 transactionId: ref,
-                Status: Status,               
-                credit: parseFloat(credit),               
+                Status: Status,
+                credit: parseFloat(credit),
                 details: {
                     telecomProvider: network,
                     sender: sender,
@@ -190,6 +190,8 @@ router.post('/webhook', async (req, res) => {
                     charge: parseFloat(Charge),
                 },
             });
+            console.log(update)
+
         } else {
             console.warn(`Unhandled status: ${status}`);
         }

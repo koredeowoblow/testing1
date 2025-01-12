@@ -79,7 +79,7 @@ const CompleteAirtimeConversion = async (req, res) => {
       webhookURL: 'https://testing1-xpjd.onrender.com/api/airtime/webhook', // Replace with your webhook URL
     });
 
-    const url = `https://vtuafrica.com.ng/portal/api/airtime-cash/?${queryParams.toString()}`;
+    const url = `https://vtuafrica.com.ng/portal/api-test/airtime-cash/?${queryParams.toString()}`;
 
     https.get(url, (apiRes) => {
       let data = '';
