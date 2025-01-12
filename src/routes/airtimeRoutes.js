@@ -160,6 +160,7 @@ router.post('/webhook', async (req, res) => {
 
         // Extract and validate the payload
         const { ref, status, service, network, amount, credit, Charge, sender } = req.body;
+        console.log(req.body)
 
         if (!ref || !status || !service || !amount) {
             console.error('Invalid webhook payload:', req.body);

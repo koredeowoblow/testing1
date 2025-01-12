@@ -137,10 +137,10 @@ export const authorize = (...roles) => {
   };
 };
 
-// Middleware to validate tokens
+
 export const checkSessionValidity = async (req, res, next) => {
   try {
-    // Get token from headers
+    // Extract token from headers
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
       return res.status(401).json({
@@ -149,40 +149,43 @@ export const checkSessionValidity = async (req, res, next) => {
       });
     }
 
-    // Verify the token
+    console.debug("Token received:", token);
+
+    // Decode and verify the token
     let decoded;
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.debug("Decoded token:", decoded);
     } catch (error) {
+      console.error("JWT Verification Error:", error);
       return res.status(401).json({
         status: "error",
         message: "Invalid or expired token.",
       });
     }
 
-    // Find session in the database
-    const session = await Session.findOne({
-      where: { token },
-    });
-
-    // If session is not found, return an error
+    // Check session in the database
+    const session = await Session.findOne({ where: { token } });
     if (!session) {
+      console.warn("No session found for token:", token);
       return res.status(401).json({
         status: "error",
         message: "Session not found or invalid token.",
       });
     }
 
-    // Check if time limit has expired
+    console.debug("Session found:", session);
+
+    // Check if the session has expired
     const currentTime = new Date();
     const timeLimit = new Date(session.timeLimit);
 
-    if (currentTime > timeLimit) {
-      // Update session status to "inactive"
-      await Session.update(
-        { status: "inactive" },
-        { where: { token } }
-      );
+    console.debug("Current Time:", currentTime);
+    console.debug("Session Time Limit:", timeLimit);
+
+    if (currentTime >= timeLimit) {
+      console.info("Session expired, updating status to inactive...");
+      await Session.update({ status: "inactive" }, { where: { token } });
 
       return res.status(401).json({
         status: "error",
@@ -191,7 +194,8 @@ export const checkSessionValidity = async (req, res, next) => {
     }
 
     // Check session status
-    if (session.status !== "active") {
+    if (session.status === "inactive") {
+      console.warn("Inactive session for token:", token);
       return res.status(401).json({
         status: "error",
         message: "Session is not active.",
@@ -200,8 +204,9 @@ export const checkSessionValidity = async (req, res, next) => {
 
     // Attach user information to the request object
     req.user = { id: decoded.id, userId: session.userId };
+    console.debug("User attached to request:", req.user);
 
-    // Proceed to the next middleware or route handler
+    // Proceed to the next middleware
     next();
   } catch (error) {
     console.error("Error in session validation middleware:", error);
@@ -211,3 +216,5 @@ export const checkSessionValidity = async (req, res, next) => {
     });
   }
 };
+
+
