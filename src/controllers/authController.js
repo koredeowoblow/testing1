@@ -5,11 +5,27 @@ import { sendResetPasswordEmail } from '../services/emailService.js';
 import createSession from '../services/session.js';
 import Session from '../models/Session.js';
 
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRATION
-  });
+const generateUniqueToken = async (id) => {
+  let token;
+  let isUnique = false;
+
+  while (!isUnique) {
+    // Generate a new token
+    token = jwt.sign({ id }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRATION,
+    });
+
+    // Check if the token already exists in the Session table
+    const existingSession = await Session.findOne({ where: { token } });
+
+    if (!existingSession) {
+      isUnique = true;
+    }
+  }
+
+  return token;
 };
+
 
 export const register = async (req, res, next) => {
   try {
@@ -64,8 +80,8 @@ export const login = async (req, res, next) => {
     // Check if email and password exist
     if (!email || !password) {
       return res.status(400).json({
-        status: 'error',
-        message: 'Please provide email and password'
+        status: "error",
+        message: "Please provide email and password",
       });
     }
 
@@ -74,8 +90,8 @@ export const login = async (req, res, next) => {
 
     if (!user || !(await user.comparePassword(password))) {
       return res.status(401).json({
-        status: 'error',
-        message: 'Incorrect email or password'
+        status: "error",
+        message: "Incorrect email or password",
       });
     }
 
@@ -83,26 +99,28 @@ export const login = async (req, res, next) => {
     user.lastLogin = new Date();
     await user.save();
 
-    // Generate token
-    const token = generateToken(user.id);
+    // Generate a unique token
+    const token = await generateUniqueToken(user.id);
 
-    // Data to be passed to createSession
-    const data = [token, user.id];
-    const userId=user.id
-    
     // Create session
-    const session = await createSession(token, userId);
-    if (session.status === 'success') {
+    const session = await createSession(token, user.id);
+    if (session.status === "success") {
       // Respond with success and token
       return res.status(200).json({
-        status: 'success',
+        status: "success",
         data: {
           user,
-          token
-        }
+          token,
+        },
+      });
+    } else {
+      return res.status(500).json({
+        status: "error",
+        message: "Failed to create session.",
       });
     }
   } catch (error) {
+    console.error("Login Error:", error);
     next(error);
   }
 };
