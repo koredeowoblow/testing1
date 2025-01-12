@@ -90,3 +90,4 @@ const calculateExpiration = (expiration) => {
 
     return timeLimit;
 };
+export default createSession;
