@@ -92,7 +92,7 @@ const CompleteAirtimeConversion = async (req, res) => {
       // Handle complete response
       apiRes.on('end', async () => {
         try {
-          const result = JSON.parse(data);
+          const result = data;
 
           if (result.code === 101) {
             let status = result.description.status === 'Processing' ? 'pending' : 'successful';
