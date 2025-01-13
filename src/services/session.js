@@ -32,10 +32,18 @@ const createSession = async (token, userId) => {
 
     // Calculate the time limit for the session
     const expiration = process.env.JWT_EXPIRATION;
+    if (!expiration) {
+      throw new Error("JWT_EXPIRATION is not defined in the environment variables.");
+    }
+
     const value = parseInt(expiration.slice(0, -1), 10); // Extract numeric part
     const unit = expiration.slice(-1); // Extract unit (h, m, d)
-    const now = new Date();
 
+    if (isNaN(value)) {
+      throw new Error("Invalid JWT_EXPIRATION format. Ensure it starts with a number (e.g., 1h, 30m).");
+    }
+
+    const now = new Date();
     const timeLimit = new Date(now.getTime()); // Start with the current time
 
     switch (unit) {
@@ -51,6 +59,8 @@ const createSession = async (token, userId) => {
       default:
         throw new Error("Unsupported JWT_EXPIRATION unit. Use 'h', 'm', or 'd'.");
     }
+
+    console.log("Calculated timeLimit:", timeLimit);
 
     // Create a new session in the database
     const newSession = await Session.create({
