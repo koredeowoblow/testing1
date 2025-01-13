@@ -60,13 +60,13 @@ const createSession = async (token, userId) => {
         throw new Error("Unsupported JWT_EXPIRATION unit. Use 'h', 'm', or 'd'.");
     }
 
-    console.log("Calculated timeLimit:", timeLimit);
+    console.log("Calculated timeLimit:", timeLimit); // Log the calculated timeLimit for debugging
 
     // Create a new session in the database
     const newSession = await Session.create({
       userId,
       token,
-      timeLimit,
+      timeLimit, // Store as a valid JavaScript Date object
       status: "active",
     });
 
