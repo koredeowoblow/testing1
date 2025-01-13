@@ -1,7 +1,7 @@
 import axios from 'axios';
 import User from '../models/User.js';
 import dotenv from 'dotenv';
-import {saveTransaction} from '../services/savingtransaction.js';
+import { saveTransaction } from '../services/savingtransaction.js';
 import https from 'https';
 import generateUniqueRef from '../services/referenceNumberGenerator.js';
 
@@ -34,7 +34,7 @@ const initializeAirtimeConversion = async (req, res) => {
         status: 'success',
         message: result.description.message,
         phone: result.description.Phone_Number,
-        
+
       });
     } else {
       // Handle API errors
@@ -59,14 +59,14 @@ const CompleteAirtimeConversion = async (req, res) => {
       amount,
       network,
       Sender_phone: senderPhone,
-      reciever_phone: receiverPhone
+      reciever_phone: receiverPhone,
     } = req.body;
 
     if (!userId || !amount || !network || !senderPhone || !receiverPhone) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    const ref = await generateUniqueRef();
+    const ref = await generateUniqueRef(); // Ensure this function is implemented correctly
 
     const queryParams = new URLSearchParams({
       apikey: apiKEY, // Replace with your actual API key
@@ -84,29 +84,25 @@ const CompleteAirtimeConversion = async (req, res) => {
     https.get(url, (apiRes) => {
       let data = '';
 
+      // Collect data chunks
       apiRes.on('data', (chunk) => {
         data += chunk;
       });
 
+      // Handle complete response
       apiRes.on('end', async () => {
         try {
           const result = JSON.parse(data);
 
           if (result.code === 101) {
-            // Save the transaction
-            const status = result.description.status;
-            if (status == "Processing") {
-              status = "pending";
-            }
-            if (status == "Completed") {
-              status = "successful"
-            }
+            let status = result.description.status === 'Processing' ? 'pending' : 'successful';
+
             const transactionData = {
               userId,
               type: 'airtime_conversion',
               amount,
               referenceId: ref,
-              status: status,
+              status,
               details: {
                 telecomProvider: network,
                 phone: senderPhone,
@@ -116,12 +112,10 @@ const CompleteAirtimeConversion = async (req, res) => {
             const saveResult = await saveTransaction(transactionData);
 
             if (saveResult.status === 'success') {
-              console.log(result);
               return res.status(200).json({
                 status: 'success',
                 message: result.description.message,
               });
-
             } else {
               return res.status(500).json({
                 status: 'error',
@@ -129,16 +123,25 @@ const CompleteAirtimeConversion = async (req, res) => {
                 error: saveResult.message,
               });
             }
+          } else {
+            return res.status(400).json({
+              status: 'error',
+              message: result.description?.message || 'Unknown error occurred.',
+            });
           }
-
-          // return res.status(200).json(result);
         } catch (error) {
           console.error('Error parsing JSON:', error.message);
           return res.status(500).json({ error: 'Failed to parse API response' });
         }
       });
+
+      // Handle API request errors
+      apiRes.on('error', (err) => {
+        console.error('API Response Error:', err.message);
+        return res.status(500).json({ error: 'Error receiving API response' });
+      });
     }).on('error', (err) => {
-      console.error('Error:', err.message);
+      console.error('Request Error:', err.message);
       return res.status(500).json({ error: 'Failed to make API request' });
     });
   } catch (err) {
