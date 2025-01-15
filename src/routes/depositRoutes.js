@@ -1,6 +1,9 @@
 import express from 'express'
-import * as depositController from '../controllers/depositController.js'
-import { protectUser } from '../middleware/authMiddleware.js'
+import * as deposit from '../controllers/depositController.js'
+import {
+  protectUser,
+  checkSessionValidity
+} from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
@@ -35,7 +38,7 @@ const router = express.Router()
  *       500:
  *         description: Internal server error
  */
-router.post('/', protectUser, depositController.createDeposit)
+router.post('/', protectUser, checkSessionValidity, deposit.createDeposit)
 
 /**
  * @swagger
@@ -60,7 +63,12 @@ router.post('/', protectUser, depositController.createDeposit)
  *       500:
  *         description: Internal server error
  */
-router.get('/get/:id', protectUser, depositController.getDepositDetails)
+router.get(
+  '/get/:id',
+  protectUser,
+  checkSessionValidity,
+  deposit.getDepositDetails
+)
 
 /**
  * @swagger
@@ -96,8 +104,18 @@ router.get('/get/:id', protectUser, depositController.getDepositDetails)
  *       500:
  *         description: Internal server error
  */
-router.put('/update/{id}', protectUser, depositController.updateDepositStatus)
+router.put(
+  '/update/{id}',
+  protectUser,
+  checkSessionValidity,
+  deposit.updateDepositStatus
+)
 
-router.post('/getKey', protectUser, depositController.processRequest)
+router.post(
+  '/getKey',
+  protectUser,
+  checkSessionValidity,
+  deposit.processRequest
+)
 
 export default router

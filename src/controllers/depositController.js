@@ -46,7 +46,7 @@ export const createDeposit = async (req, res, next) => {
     user.balance += amount
     await user.save()
 
-    res.status(201).json({
+    res.status(200).json({
       status: 'success',
       message: 'Deposit created and balance updated successfully.',
       data: result.data
@@ -141,5 +141,5 @@ export const processRequest = async (req, res) => {
   }
 
   // Send the output as JSON
-  res.status(201).json(output)
+  res.status(200).json(output)
 }
