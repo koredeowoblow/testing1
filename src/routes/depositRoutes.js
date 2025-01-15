@@ -98,6 +98,6 @@ router.get('/get/:id', protectUser, depositController.getDepositDetails);
  */
 router.put('/update/{id}', protectUser, depositController.updateDepositStatus);
 
-router.get('/getKey',protectUser, depositController.processRequest); 
+router.post('/getKey',protectUser, depositController.processRequest); 
 
 export default router;
