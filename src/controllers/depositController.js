@@ -108,44 +108,58 @@ export const updateDepositStatus = async (req, res) => {
 }
 
 export const processRequest = async (req, res) => {
-  const { user_id, amount } = req.body
-  if (!user_id) {
-    return res.status(400).json({
-      status: 'error',
-      message: 'user id is required'
-    })
-  }
-  const user = await User.findOne({ where: { id: user_id } })
-  if (!user) {
-    return res.status(404).json({
-      status: 'error',
-      message: 'User not found'
-    })
-  }
-  if (amount) {
-    // Replace this with your actual public key
-    const publicKey = process.env.PAYSTACK_PUBLIC_KEY
+  try {
+    const { user_id, amount } = req.body
 
-    // Encode the key in Base64
+    // Validate user_id
+    if (!user_id) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'User ID is required'
+      })
+    }
+
+    // Fetch user
+    const user = await User.findOne({ where: { id: user_id } })
+    if (!user) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'User not found'
+      })
+    }
+
+    // Validate amount
+    if (!amount) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Amount is required'
+      })
+    }
+
+    // Ensure PAYSTACK_PUBLIC_KEY is set
+    const publicKey = process.env.PAYSTACK_PUBLIC_KEY
+    if (!publicKey) {
+      return res.status(500).json({
+        status: 'error',
+        message: 'Public key not configured'
+      })
+    }
+
+    // Encode the public key in Base64
     const encodedPublicKey = Buffer.from(publicKey).toString('base64')
 
-    // // Add success data to the output
-    // output.result = 'success'
-    // output.email = user.email
-    // output.amount = amount
-    // output.publicKey = encodedPublicKey
-  } else {
-    // Handle the error case
-    return res.status(404).json({
+    // Send success response
+    res.status(200).json({
+      status: 'success',
+      email: user.email,
+      publicKey: encodedPublicKey,
+      amount: amount
+    })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({
       status: 'error',
-      message: 'Invalid email or amount.'
+      message: 'An unexpected error occurred'
     })
   }
-  // Send the output as JSON
-  res.status(200).json({
-    status: 'success',
-    email: user.email,
-    publicKey: encodedPublicKey,
-    amount: amount
-  })
 }
