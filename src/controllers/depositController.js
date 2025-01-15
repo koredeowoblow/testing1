@@ -5,7 +5,7 @@ import { saveTransaction } from '../services/savingtransaction.js'
 dotenv.config()
 
 // Create a new deposit
-export const createDeposit = async (req, res, next) => {
+export const createDeposit = async (req, res) => {
   try {
     const { userId, amount, reference } = req.body
 
@@ -80,7 +80,7 @@ export const getDepositDetails = async (req, res, next) => {
 }
 
 // Update deposit status
-export const updateDepositStatus = async (req, res, next) => {
+export const updateDepositStatus = async (req, res) => {
   try {
     const { id } = req.params
     const { status } = req.body
@@ -139,7 +139,6 @@ export const processRequest = async (req, res) => {
     output.result = 'error'
     output.message = 'Invalid email or amount.'
   }
-
   // Send the output as JSON
-  res.status(200).json(output)
+  res.status(200).json({output})
 }
