@@ -75,11 +75,11 @@ export const saveTransaction = async (transactionData) => {
         );
 
         // Update user balance (add amount for deposit)
-        const user = await User.findByPk(userId, { transaction: t });
-        if (user) {
-          user.account_balance += amount;
-          await user.save({ transaction: t });
-        }
+        // const user = await User.findByPk(userId, { transaction: t });
+        // if (user) {
+        //   user.account_balance += amount;
+        //   await user.save({ transaction: t });
+        // }
       } else if (type === 'bill_payment') {
         const { billType, billProvider } = details;
         relatedRecord = await BillPayments.create(

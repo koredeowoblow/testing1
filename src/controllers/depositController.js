@@ -42,14 +42,15 @@ export const createDeposit = async (req, res) => {
         message: 'User not found.'
       })
     }
-
-    user.balance += amount
+    currentbalance = user.account_balance
+    newBalance = amount + currentbalance
+    // Update the account balance
+    user.account_balance = newBalance
     await user.save()
-
+    console.log('Deposit created and balance updated successfully.'),
+      console.log(result.data)
     res.status(200).json({
-      status: 'success',
-      message: 'Deposit created and balance updated successfully.',
-      data: result.data
+      status: 'success'
     })
   } catch (error) {
     next(error)
