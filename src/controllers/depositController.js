@@ -5,7 +5,7 @@ import { saveTransaction } from '../services/savingtransaction.js'
 dotenv.config()
 
 // Create a new deposit
-export const createDeposit = async (req, res) => {
+export const createDeposit = async (req, res, next) => {
   try {
     const { userId, amount, reference } = req.body
 
@@ -17,9 +17,17 @@ export const createDeposit = async (req, res) => {
       })
     }
 
-    // // Generate a unique reference ID
-    // const referenceId = await generateUniqueReference()
-    const referenceId = reference
+    // Validate that the amount is a positive number
+    if (amount <= 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Amount must be greater than zero.'
+      })
+    }
+
+    // Set reference ID (use provided reference or generate a unique one)
+    const referenceId = reference  // Replace with your function to generate unique references
+
     // Save the deposit transaction
     const transactionData = {
       userId,
@@ -30,8 +38,13 @@ export const createDeposit = async (req, res) => {
 
     const result = await saveTransaction(transactionData)
 
+    // Handle transaction save errors
     if (result.status === 'error') {
-      return res.status(500).json(result)
+      return res.status(500).json({
+        status: 'error',
+        message: 'Failed to save transaction.',
+        details: result.error || 'Unknown error occurred.'
+      })
     }
 
     // Update user's account balance
@@ -42,18 +55,29 @@ export const createDeposit = async (req, res) => {
         message: 'User not found.'
       })
     }
-    currentbalance = user.account_balance
-    newBalance = amount + currentbalance
-    // Update the account balance
+
+    // Calculate and update the new balance
+    const currentBalance = user.account_balance || 0 // Default to 0 if undefined
+    const newBalance = currentBalance + amount
     user.account_balance = newBalance
     await user.save()
-    console.log('Deposit created and balance updated successfully.'),
-      console.log(result.data)
+
+    // Log and send success response
+    console.log(
+      'Deposit created and balance updated successfully:',
+      result.data
+    )
     res.status(200).json({
-      status: 'success'
+      status: 'success',
+      message: 'Deposit created and account balance updated successfully.',
+      data: {
+        transaction: result.data,
+        newBalance
+      }
     })
   } catch (error) {
-    next(error)
+    console.error('Error creating deposit:', error)
+    next(error) // Pass the error to your global error handler
   }
 }
 
