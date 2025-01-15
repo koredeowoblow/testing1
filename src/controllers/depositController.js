@@ -8,7 +8,7 @@ dotenv.config()
 // Create a new deposit
 export const createDeposit = async (req, res, next) => {
   try {
-    const { userId, amount } = req.body
+    const { userId, amount, reference } = req.body
 
     // Validate required fields
     if (!userId || !amount) {
@@ -18,16 +18,15 @@ export const createDeposit = async (req, res, next) => {
       })
     }
 
-    // Generate a unique reference ID
-    const referenceId = await generateUniqueReference()
+    // // Generate a unique reference ID
+    // const referenceId = await generateUniqueReference()
 
     // Save the deposit transaction
     const transactionData = {
       userId,
       type: 'deposit',
       amount,
-      referenceId,
-      status
+      reference
     }
 
     const result = await saveTransaction(transactionData)
