@@ -19,13 +19,13 @@ export const createDeposit = async (req, res) => {
 
     // // Generate a unique reference ID
     // const referenceId = await generateUniqueReference()
-
+    const referenceId = reference
     // Save the deposit transaction
     const transactionData = {
       userId,
       type: 'deposit',
       amount,
-      reference
+      referenceId
     }
 
     const result = await saveTransaction(transactionData)
