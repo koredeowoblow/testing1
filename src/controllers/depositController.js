@@ -1,7 +1,6 @@
 import Deposit from '../models/Deposits.js'
 import User from '../models/User.js'
 import dotenv from 'dotenv'
-import generateUniqueReference from '../services/referenceNumberGenerator.js'
 import { saveTransaction } from '../services/savingtransaction.js'
 dotenv.config()
 
@@ -142,5 +141,5 @@ export const processRequest = async (req, res) => {
   }
 
   // Send the output as JSON
-  res.json(output)
+  res.status(201).json(output)
 }
