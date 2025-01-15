@@ -129,16 +129,23 @@ export const processRequest = async (req, res) => {
     // Encode the key in Base64
     const encodedPublicKey = Buffer.from(publicKey).toString('base64')
 
-    // Add success data to the output
-    output.result = 'success'
-    output.email = user.email
-    output.amount = amount
-    output.publicKey = encodedPublicKey
+    // // Add success data to the output
+    // output.result = 'success'
+    // output.email = user.email
+    // output.amount = amount
+    // output.publicKey = encodedPublicKey
   } else {
     // Handle the error case
-    output.result = 'error'
-    output.message = 'Invalid email or amount.'
+    return res.status(404).json({
+      status: 'error',
+      message: 'Invalid email or amount.'
+    })
   }
   // Send the output as JSON
-  res.status(200).json({output})
+  res.status(200).json({
+    status: 'success',
+    email: user.email,
+    publicKey: encodedPublicKey,
+    amount: amount
+  })
 }
