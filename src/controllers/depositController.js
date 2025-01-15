@@ -7,79 +7,83 @@ dotenv.config()
 // Create a new deposit
 export const createDeposit = async (req, res, next) => {
   try {
-    const { userId, amount, reference } = req.body
+    const { userId, amount, reference } = req.body;
 
     // Validate required fields
     if (!userId || !amount) {
       return res.status(400).json({
         status: 'error',
-        message: 'User ID and amount are required.'
-      })
+        message: 'User ID and amount are required.',
+      });
     }
 
     // Validate that the amount is a positive number
-    if (amount <= 0) {
+    if (isNaN(amount) || amount <= 0) {
       return res.status(400).json({
         status: 'error',
-        message: 'Amount must be greater than zero.'
-      })
+        message: 'Amount must be a valid number greater than zero.',
+      });
     }
 
+    // Convert amount to a float for arithmetic operations
+    const depositAmount = parseFloat(amount);
+
     // Set reference ID (use provided reference or generate a unique one)
-    const referenceId = reference  // Replace with your function to generate unique references
+    const referenceId = reference || generateUniqueReference(); // Replace with your logic to generate unique references
 
     // Save the deposit transaction
     const transactionData = {
       userId,
       type: 'deposit',
-      amount,
-      referenceId
-    }
+      amount: depositAmount,
+      referenceId,
+      status :'successful'
+    };
 
-    const result = await saveTransaction(transactionData)
+    const result = await saveTransaction(transactionData);
 
     // Handle transaction save errors
     if (result.status === 'error') {
       return res.status(500).json({
         status: 'error',
         message: 'Failed to save transaction.',
-        details: result.error || 'Unknown error occurred.'
-      })
+        details: result.error || 'Unknown error occurred.',
+      });
     }
 
     // Update user's account balance
-    const user = await User.findByPk(userId)
+    const user = await User.findByPk(userId);
     if (!user) {
       return res.status(404).json({
         status: 'error',
-        message: 'User not found.'
-      })
+        message: 'User not found.',
+      });
     }
 
     // Calculate and update the new balance
-    const currentBalance = user.account_balance || 0 // Default to 0 if undefined
-    const newBalance = currentBalance + amount
-    user.account_balance = newBalance
-    await user.save()
+    const currentBalance = parseFloat(user.account_balance) || 0; // Ensure numeric conversion
+    const newBalance = currentBalance + depositAmount;
+
+    // Update and save the account balance
+    user.account_balance = newBalance.toFixed(2); // Ensure 2 decimal places for consistency
+    await user.save();
 
     // Log and send success response
-    console.log(
-      'Deposit created and balance updated successfully:',
-      result.data
-    )
+    console.log('Deposit created and balance updated successfully:', result.data);
     res.status(200).json({
       status: 'success',
       message: 'Deposit created and account balance updated successfully.',
       data: {
         transaction: result.data,
-        newBalance
-      }
-    })
+        newBalance: parseFloat(newBalance.toFixed(2)), // Send as a number in the response
+      },
+    });
   } catch (error) {
-    console.error('Error creating deposit:', error)
-    next(error) // Pass the error to your global error handler
+    console.error('Error creating deposit:', error);
+    next(error); // Pass the error to your global error handler
   }
-}
+};
+
 
 // Fetch deposit details
 export const getDepositDetails = async (req, res, next) => {
