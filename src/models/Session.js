@@ -31,9 +31,9 @@ const Session = sequelize.define('Session', {
 }, {
     hooks: {
         beforeCreate: async (user) => {
-            if (session.token) {
+            if (Session.token) {
                 const salt = await bcrypt.genSalt(10);
-                user.password = await bcrypt.hash(session.token, salt);
+                user.password = await bcrypt.hash(Session.token, salt);
             }
         }
     }
