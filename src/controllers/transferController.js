@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
-import resolveBankAccountPaystack from '../services/PaystackService.js'
-import verifyBankDetailsVtu from '../services/VtuAfricaService.js'
+import {resolveBankAccountPaystack} from '../services/PaystackService.js'
+import {verifyBankDetailsVtu} from '../services/VtuAfricaService.js'
 
 
 // Load environment variables
